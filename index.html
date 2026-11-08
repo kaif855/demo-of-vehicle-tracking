@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vehicle Tracking System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050816;
+      --cyan: #22d3ee;
+      --violet: #8b5cf6;
+      --text: #e6edf7;
+      --muted: #94a3b8;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      font-family: "Inter", "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Animated grid floor */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(34,211,238,.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34,211,238,.07) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+      -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+      animation: gridMove 12s linear infinite;
+    }
+    @keyframes gridMove { to { background-position: 0 48px, 48px 0; } }
+
+    /* Glowing orbs */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: .45;
+      z-index: 0;
+      animation: float 10s ease-in-out infinite alternate;
+    }
+    .orb.one { width: 380px; height: 380px; background: var(--violet); top: -120px; left: -100px; }
+    .orb.two { width: 340px; height: 340px; background: var(--cyan); bottom: -120px; right: -90px; animation-delay: -4s; }
+    @keyframes float { to { transform: translate(30px, 40px) scale(1.1); } }
+
+    /* Card */
+    .card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+      padding: 44px 34px 34px;
+      border-radius: 28px;
+      background: linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.14);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 30px 80px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.15);
+      animation: rise .8s ease both;
+    }
+    @keyframes rise { from { opacity: 0; transform: translateY(24px); } }
+
+    /* Corner accents */
+    .card::before, .card::after {
+      content: "";
+      position: absolute;
+      width: 34px; height: 34px;
+      border: 2px solid var(--cyan);
+      opacity: .8;
+    }
+    .card::before { top: 14px; left: 14px; border-right: 0; border-bottom: 0; border-top-left-radius: 10px; }
+    .card::after  { bottom: 14px; right: 14px; border-left: 0; border-top: 0; border-bottom-right-radius: 10px; }
+
+    /* Icon */
+    .logo { width: 132px; height: 132px; margin: 0 auto 18px; filter: drop-shadow(0 0 18px rgba(34,211,238,.55)); }
+    .logo svg { width: 100%; height: 100%; overflow: visible; }
+    .ring-spin  { transform-box: fill-box; transform-origin: center; animation: spin 9s linear infinite; }
+    .ring-spin2 { transform-box: fill-box; transform-origin: center; animation: spin 14s linear infinite reverse; }
+    .pulse      { transform-box: fill-box; transform-origin: center; animation: pulse 2.4s ease-out infinite; }
+    .pulse.p2   { animation-delay: 1.2s; }
+    .pin        { animation: bob 3s ease-in-out infinite; }
+    @keyframes spin  { to { transform: rotate(360deg); } }
+    @keyframes pulse { 0% { transform: scale(.3); opacity: .9; } 100% { transform: scale(1.6); opacity: 0; } }
+    @keyframes bob   { 50% { transform: translateY(-4px); } }
+
+    /* Text */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--cyan);
+      border: 1px solid rgba(34,211,238,.35);
+      background: rgba(34,211,238,.08);
+      padding: 5px 12px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+    .tag i { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 8px #22c55e; animation: blink 1.4s infinite; }
+    @keyframes blink { 50% { opacity: .3; } }
+
+    h1 {
+      font-family: "Orbitron", "Segoe UI", sans-serif;
+      font-weight: 800;
+      font-size: 27px;
+      line-height: 1.25;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, #fff, var(--cyan) 60%, var(--violet));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .sub { color: var(--muted); font-size: 15px; line-height: 1.6; margin-bottom: 32px; }
+
+    /* Buttons */
+    .btn {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 15px;
+      margin-bottom: 14px;
+      border-radius: 14px;
+      font-family: "Orbitron", "Segoe UI", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-decoration: none;
+      overflow: hidden;
+      transition: transform .2s, box-shadow .25s;
+    }
+    .btn svg { width: 18px; height: 18px; transition: transform .25s; }
+    .btn:hover { transform: translateY(-3px); }
+    .btn:hover svg { transform: translateX(5px); }
+    .btn:active { transform: translateY(0) scale(.98); }
+
+    .btn-primary {
+      color: #04101f;
+      background: linear-gradient(90deg, var(--cyan), var(--violet));
+      box-shadow: 0 8px 28px rgba(34,211,238,.35);
+    }
+    .btn-primary:hover { box-shadow: 0 12px 38px rgba(139,92,246,.55); }
+    /* shine sweep */
+    .btn-primary::after {
+      content: "";
+      position: absolute;
+      top: 0; left: -80%;
+      width: 50%; height: 100%;
+      background: linear-gradient(120deg, transparent, rgba(255,255,255,.55), transparent);
+      transform: skewX(-20deg);
+      transition: left .6s;
+    }
+    .btn-primary:hover::after { left: 130%; }
+
+    .btn-secondary {
+      color: var(--text);
+      background: rgba(255,255,255,.04);
+      border: 1.5px solid rgba(34,211,238,.55);
+    }
+    .btn-secondary:hover { background: rgba(34,211,238,.12); box-shadow: 0 0 26px rgba(34,211,238,.35); }
+
+    /* Feature chips */
+    .features {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .features span::before { content: "◆ "; color: var(--cyan); }
+
+    @media (max-width: 420px) {
+      .card { padding: 36px 22px 26px; }
+      h1 { font-size: 22px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb one"></div>
+  <div class="orb two"></div>
+
+  <main class="card">
+    <!-- Futuristic animated icon -->
+    <div class="logo" aria-hidden="true">
+      <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#22d3ee"/>
+            <stop offset="1" stop-color="#8b5cf6"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Outer dashed orbit with satellite dot -->
+        <g class="ring-spin">
+          <circle cx="60" cy="60" r="54" fill="none" stroke="url(#g)" stroke-width="1.5" stroke-dasharray="3 7" opacity=".8"/>
+          <circle cx="60" cy="6" r="4" fill="#22d3ee"/>
+        </g>
+        <!-- Inner counter-rotating arc ring -->
+        <g class="ring-spin2">
+          <circle cx="60" cy="60" r="44" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="40 60" stroke-linecap="round" opacity=".7"/>
+        </g>
+
+        <!-- Ground pulse (radar) -->
+        <ellipse class="pulse"    cx="60" cy="90" rx="22" ry="7" fill="none" stroke="#22d3ee" stroke-width="1.5"/>
+        <ellipse class="pulse p2" cx="60" cy="90" rx="22" ry="7" fill="none" stroke="#22d3ee" stroke-width="1.5"/>
+        <ellipse cx="60" cy="90" rx="6" ry="2.2" fill="#22d3ee" opacity=".9"/>
+
+        <!-- Location pin -->
+        <g class="pin">
+          <path d="M60 24 C47 24 37 34 37 46 C37 62 60 86 60 86 C60 86 83 62 83 46 C83 34 73 24 60 24 Z"
+                fill="rgba(34,211,238,.12)" stroke="url(#g)" stroke-width="3" stroke-linejoin="round"/>
+          <!-- Mini car inside the pin -->
+          <path d="M49 50 L52 42 Q53 40 55 40 L65 40 Q67 40 68 42 L71 50 Z" fill="url(#g)"/>
+          <rect x="47" y="49" width="26" height="8" rx="3" fill="url(#g)"/>
+          <circle cx="54" cy="58" r="3" fill="#050816" stroke="#22d3ee" stroke-width="1.5"/>
+          <circle cx="66" cy="58" r="3" fill="#050816" stroke="#22d3ee" stroke-width="1.5"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="tag"><i></i> Live Tracking</div>
+    <h1>VEHICLE TRACKING<br>SYSTEM</h1>
+    <p class="sub">Apni gaadiyon ko real time me track karo, kahin se bhi, kabhi bhi.</p>
+
+    <!-- Next pages: signin.html aur signup.html baad me bana lena -->
+    <a href="signin.html" class="btn btn-primary">
+      Sign In
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+    <a href="signup.html" class="btn btn-secondary">
+      Sign Up
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+
+    <div class="features">
+      <span>Real-time GPS</span>
+      <span>Secure</span>
+      <span>24/7 Monitoring</span>
+    </div>
+  </main>
+</body>
+</html>

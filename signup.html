@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up | Vehicle Tracking System</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--c:#22d3ee;--v:#8b5cf6;--m:#94a3b8;--r:#fb7185;--g:#22c55e}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;font-family:Inter,"Segoe UI",Arial,sans-serif;color:#e6edf7;overflow-x:hidden;
+background:radial-gradient(circle at 0 0,rgba(139,92,246,.35),transparent 40%),radial-gradient(circle at 100% 100%,rgba(34,211,238,.3),transparent 40%),#050816}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;animation:grid 12s linear infinite;
+background:linear-gradient(rgba(34,211,238,.07) 1px,transparent 1px) 0 0/48px 48px,linear-gradient(90deg,rgba(34,211,238,.07) 1px,transparent 1px) 0 0/48px 48px;
+-webkit-mask-image:radial-gradient(ellipse,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse,#000 30%,transparent 75%)}
+@keyframes grid{to{background-position:0 48px,48px 0}}
+svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.back{position:fixed;top:20px;left:20px;z-index:2;display:flex;align-items:center;gap:8px;color:var(--m);text-decoration:none;font-size:13px;padding:8px 14px;border-radius:99px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);transition:.2s}
+.back:hover{color:var(--c);border-color:var(--c)}
+.back svg{width:16px;height:16px}
+
+.card{position:relative;width:100%;max-width:440px;margin:56px 0 20px;text-align:center;padding:40px 34px 32px;border-radius:28px;border:1px solid rgba(255,255,255,.14);background:linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.03));backdrop-filter:blur(18px);box-shadow:0 30px 80px rgba(0,0,0,.55);animation:rise .8s both}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}}
+.card::before,.card::after{content:"";position:absolute;width:34px;height:34px;border:2px solid var(--c);opacity:.8}
+.card::before{top:14px;left:14px;border-right:0;border-bottom:0;border-top-left-radius:10px}
+.card::after{bottom:14px;right:14px;border-left:0;border-top:0;border-bottom-right-radius:10px}
+
+.logo{width:96px;height:96px;margin:0 auto 14px;filter:drop-shadow(0 0 16px rgba(34,211,238,.55))}
+.logo svg{width:100%;height:100%;overflow:visible;stroke:none}
+.a{transform-box:fill-box;transform-origin:center;animation:spin 9s linear infinite}
+.b{animation-duration:14s;animation-direction:reverse}
+.p{transform-box:fill-box;transform-origin:center;animation:pulse 2.4s ease-out infinite}
+.pin{animation:bob 3s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%{transform:scale(.3);opacity:.9}to{transform:scale(1.6);opacity:0}}
+@keyframes bob{50%{transform:translateY(-4px)}}
+
+h1,h2,.btn{font-family:Orbitron,"Segoe UI",sans-serif}
+h1{font-size:26px;letter-spacing:2px;margin-bottom:8px;background:linear-gradient(90deg,#fff,var(--c) 60%,var(--v));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub,.success p{color:var(--m);font-size:14px;line-height:1.6}
+.sub{margin-bottom:26px}
+
+form{text-align:left}
+.field{margin-bottom:16px}
+label{display:block;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--c);margin-bottom:8px}
+.wrap{position:relative}
+.lead{position:absolute;left:14px;top:50%;width:18px;height:18px;transform:translateY(-50%);color:var(--m);pointer-events:none;transition:.2s}
+input{width:100%;padding:14px 44px;font:15px Inter,sans-serif;color:#e6edf7;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.14);border-radius:14px;outline:0;transition:.2s}
+#password{padding-right:82px}
+input::placeholder{color:#64748b}
+input:focus{border-color:var(--c);background:rgba(34,211,238,.06);box-shadow:0 0 0 4px rgba(34,211,238,.15)}
+.wrap:focus-within .lead{color:var(--c)}
+.tg{position:absolute;right:10px;top:50%;width:32px;height:32px;transform:translateY(-50%);display:grid;place-items:center;background:0;border:0;border-radius:8px;color:var(--m);cursor:pointer}
+.tg:hover{color:var(--c);background:rgba(34,211,238,.1)}
+.tg svg{width:18px;height:18px}
+
+.st{position:absolute;right:14px;top:50%;width:22px;height:22px;display:grid;place-items:center;border-radius:50%;font-size:13px;font-weight:700;opacity:0;transform:translateY(-50%) scale(.6);transition:.2s}
+.sh{right:48px}
+.hint{max-height:0;overflow:hidden;opacity:0;font-size:12.5px;color:var(--r);transition:.25s}
+.invalid .st,.valid .st{opacity:1;transform:translateY(-50%)}
+.invalid .st{background:rgba(251,113,133,.18);color:var(--r)}
+.valid .st{background:rgba(34,197,94,.18);color:var(--g)}
+.invalid input{border-color:var(--r);background:rgba(251,113,133,.07);box-shadow:0 0 0 4px rgba(251,113,133,.15),0 0 24px rgba(251,113,133,.2)}
+.valid input{border-color:var(--g);box-shadow:0 0 0 4px rgba(34,197,94,.12)}
+.invalid .lead,.invalid label{color:var(--r)}
+.valid .lead,.valid label{color:var(--g)}
+.invalid .hint{max-height:30px;opacity:1;margin-top:8px}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+.strength{display:none;align-items:center;gap:6px;margin-top:10px}
+.strength.show{display:flex}
+.strength i{flex:1;height:5px;border-radius:99px;background:rgba(255,255,255,.12);transition:.25s}
+.strength b{min-width:56px;text-align:right;font-size:12px}
+.weak{--s:var(--r)}.medium{--s:#fbbf24}.strong{--s:var(--g)}
+.strength b{color:var(--s)}
+.weak i:nth-child(1),.medium i:nth-child(-n+2),.strong i{background:var(--s);box-shadow:0 0 8px var(--s)}
+
+.btn{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:22px;padding:15px;border:0;border-radius:14px;font-size:14px;font-weight:600;letter-spacing:2px;text-transform:uppercase;text-decoration:none;cursor:pointer;overflow:hidden;color:#04101f;background:linear-gradient(90deg,var(--c),var(--v));box-shadow:0 8px 28px rgba(34,211,238,.35);transition:.25s}
+.btn svg{width:18px;height:18px;stroke-width:2.5;transition:.25s}
+.btn:hover{transform:translateY(-3px);box-shadow:0 12px 38px rgba(139,92,246,.55)}
+.btn:hover svg{transform:translateX(5px)}
+.btn::after{content:"";position:absolute;top:0;left:-80%;width:50%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);transition:left .6s}
+.btn:hover::after{left:130%}
+
+.switch{margin-top:22px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);text-align:center;font-size:14px;color:var(--m)}
+.switch a{color:var(--c);font-weight:600;text-decoration:none}
+
+.success{animation:rise .6s both}
+.check{width:110px;height:110px;margin:0 auto 22px;filter:drop-shadow(0 0 22px rgba(34,197,94,.55))}
+.check svg{width:100%;height:100%;stroke:var(--g)}
+.check circle{stroke-dasharray:302;stroke-dashoffset:302;animation:draw .7s forwards}
+.check path{stroke-dasharray:60;stroke-dashoffset:60;stroke-width:6;animation:draw .45s .6s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+h2{font-size:22px;letter-spacing:2px;color:var(--g);text-shadow:0 0 18px rgba(34,197,94,.5);margin-bottom:10px}
+.success b{color:var(--c)}
+.bar{height:4px;margin-top:14px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--c),var(--v));animation:fill 3s linear forwards}
+@keyframes fill{to{width:100%}}
+
+@media(max-width:420px){.card{padding:34px 22px 26px}h1{font-size:22px}}
+</style>
+</head>
+<body>
+<a href="index.html" class="back"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back</a>
+
+<main class="card">
+  <!-- Form view -->
+  <div id="formView">
+    <div class="logo"><svg viewBox="0 0 120 120">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
+      <g class="a"><circle cx="60" cy="60" r="54" fill="none" stroke="url(#g)" stroke-width="1.5" stroke-dasharray="3 7" style="stroke:url(#g)"/><circle cx="60" cy="6" r="4" fill="#22d3ee"/></g>
+      <g class="a b"><circle cx="60" cy="60" r="44" fill="none" stroke-width="2" stroke-dasharray="40 60" style="stroke:#8b5cf6;opacity:.7"/></g>
+      <ellipse class="p" cx="60" cy="90" rx="22" ry="7" fill="none" style="stroke:#22d3ee"/>
+      <ellipse cx="60" cy="90" rx="6" ry="2.2" fill="#22d3ee"/>
+      <g class="pin"><path d="M60 24C47 24 37 34 37 46c0 16 23 40 23 40s23-24 23-40c0-12-10-22-23-22z" fill="rgba(34,211,238,.12)" style="stroke:url(#g);stroke-width:3"/>
+      <path d="M49 50l3-8q1-2 3-2h10q2 0 3 2l3 8z" fill="url(#g)"/><rect x="47" y="49" width="26" height="8" rx="3" fill="url(#g)"/>
+      <circle cx="54" cy="58" r="3" fill="#050816" style="stroke:#22d3ee"/><circle cx="66" cy="58" r="3" fill="#050816" style="stroke:#22d3ee"/></g>
+    </svg></div>
+
+    <h1>SIGN UP</h1>
+    <p class="sub">Create your account and start tracking your vehicles.</p>
+
+    <form id="form" novalidate>
+      <div id="fields"></div>
+      <button class="btn">Sign Up <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </form>
+    <div class="switch">Already have an account? <a href="signin.html">Sign In</a></div>
+  </div>
+
+  <!-- Success view -->
+  <div id="successView" class="success" hidden>
+    <div class="check"><svg viewBox="0 0 110 110"><circle cx="55" cy="55" r="48" stroke-width="5" transform="rotate(-90 55 55)"/><path d="M34 56l15 14 28-30"/></svg></div>
+    <h2>SIGN UP COMPLETE!</h2>
+    <p>Welcome, <b id="hi"></b>! Your account has been created successfully.</p>
+    <p style="margin-top:16px;font-size:13px">Redirecting to Sign In in <b id="cnt">3</b> seconds...</p>
+    <div class="bar"><i></i></div>
+    <a href="signin.html" class="btn">Go to Sign In <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const emailRe = /^[\w.%+-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/i;
+
+// Each field: label, type, placeholder, icon, validate (returns an error message, "" = valid)
+const F = {
+  name: { l: "Full Name", t: "text", p: "Enter your full name", ac: "name",
+    i: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/>',
+    v: v => !v ? "Full name is required."
+      : !/^[A-Za-z .'-]+$/.test(v) ? "Name can only contain letters"
+      : v.replace(/[^A-Za-z]/g, "").length < 2 ? "Name must be at least 2 letters" : "" },
+  email: { l: "Email", t: "email", p: "you@example.com", ac: "email",
+    i: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 8l9 6 9-6"/>',
+    v: v => !v ? "Email is required."
+      : emailRe.test(v) ? "" : v.includes("@") ? "Invalid email address (e.g. name@gmail.com)" : "Invalid email: '@' is missing" },
+  phone: { l: "Phone Number", t: "tel", p: "Enter 10-digit mobile number", ac: "tel", x: ' inputmode="numeric" maxlength="10"',
+    i: '<path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/>',
+    v: v => !v ? "Phone number is required."
+      : !/^[6-9]/.test(v) ? "Invalid number: must start with 6, 7, 8 or 9"
+      : v.length < 10 ? `Phone number must be 10 digits (${v.length}/10)` : "" },
+  password: { l: "Create Password", t: "password", p: "Minimum 6 characters", ac: "new-password",
+    i: '<rect x="4" y="11" width="16" height="10" rx="3"/><path d="M8 11V8a4 4 0 018 0v3"/>',
+    v: v => !v ? "Password is required." : v.length < 6 ? "Password must be at least 6 characters" : "" }
+};
+
+// Render the form fields
+$("#fields").innerHTML = Object.entries(F).map(([k, f]) => `
+  <div class="field">
+    <label for="${k}">${f.l}</label>
+    <div class="wrap">
+      <svg class="lead" viewBox="0 0 24 24">${f.i}</svg>
+      <input id="${k}" type="${f.t}" placeholder="${f.p}" autocomplete="${f.ac}"${f.x || ""}>
+      <span class="st${k == "password" ? " sh" : ""}"></span>
+      ${k == "password" ? '<button type="button" class="tg" id="tg"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>' : ""}
+    </div>
+    <div class="hint"></div>
+    ${k == "password" ? '<div class="strength" id="sg"><i></i><i></i><i></i><b></b></div>' : ""}
+  </div>`).join("");
+
+// Validate one field. force = show an error even if empty (used on submit)
+function check(k, force) {
+  const el = $("#" + k), box = el.closest(".field");
+  const v = k == "password" ? el.value : el.value.trim();
+  box.classList.remove("valid", "invalid", "shake");
+  box.querySelector(".hint").textContent = box.querySelector(".st").textContent = "";
+  if (!v && !force) return false;
+
+  const msg = F[k].v(v);
+  box.classList.add(msg ? "invalid" : "valid");
+  box.querySelector(".st").textContent = msg ? "✕" : "✓";
+  box.querySelector(".hint").textContent = msg;
+  if (msg && force) { void box.offsetWidth; box.classList.add("shake"); }
+  return !msg;
+}
+
+// Live validation while typing
+Object.keys(F).forEach(k => $("#" + k).addEventListener("input", () => {
+  if (k == "phone") $("#phone").value = $("#phone").value.replace(/\D/g, "").slice(0, 10);
+  check(k);
+  if (k == "password") strength($("#password").value);
+}));
+
+// Password strength bar
+function strength(v) {
+  const sg = $("#sg");
+  const n = [v.length > 5, v.length > 9, /[a-z]/.test(v) && /[A-Z]/.test(v), /\d/.test(v), /\W/.test(v)].filter(Boolean).length;
+  const lv = n < 3 ? "weak" : n == 3 ? "medium" : "strong";
+  sg.className = v ? `strength show ${lv}` : "strength";
+  sg.querySelector("b").textContent = lv[0].toUpperCase() + lv.slice(1);
+}
+
+// Password show / hide
+$("#tg").onclick = () => { const p = $("#password"); p.type = p.type == "password" ? "text" : "password"; };
+
+// Submit
+$("#form").addEventListener("submit", e => {
+  e.preventDefault();
+  const bad = Object.keys(F).filter(k => !check(k, true));
+  if (bad.length) return $("#" + bad[0]).focus();
+
+  // TODO: send name, email, phone and password to your backend here
+
+  $("#hi").textContent = $("#name").value.trim().split(" ")[0];
+  $("#formView").hidden = true;
+  $("#successView").hidden = false;
+
+  let s = 3;
+  const t = setInterval(() => {
+    $("#cnt").textContent = --s;
+    if (!s) { clearInterval(t); location.href = "signin.html"; }
+  }, 1000);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard | Vehicle Tracking System</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--c:#22d3ee;--v:#8b5cf6;--m:#94a3b8;--r:#fb7185;--g:#22c55e;--y:#fbbf24;--line:rgba(255,255,255,.12)}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+body{min-height:100vh;font-family:Inter,"Segoe UI",Arial,sans-serif;color:#e6edf7;
+background:radial-gradient(circle at 0 0,rgba(139,92,246,.3),transparent 38%),radial-gradient(circle at 100% 100%,rgba(34,211,238,.25),transparent 38%),#050816;background-attachment:fixed}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;animation:grid 12s linear infinite;
+background:linear-gradient(rgba(34,211,238,.05) 1px,transparent 1px) 0 0/48px 48px,linear-gradient(90deg,rgba(34,211,238,.05) 1px,transparent 1px) 0 0/48px 48px}
+@keyframes grid{to{background-position:0 48px,48px 0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+h1,h2,h3,.btn,.num{font-family:Orbitron,"Segoe UI",sans-serif}
+
+/* Top bar */
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;padding:12px 24px;background:rgba(5,8,22,.75);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-family:Orbitron,sans-serif;font-weight:800;letter-spacing:1.5px;font-size:15px}
+.brand svg{width:38px;height:38px;stroke:none;filter:drop-shadow(0 0 8px rgba(34,211,238,.6))}
+.live{display:flex;align-items:center;gap:8px;margin-left:auto;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--c);border:1px solid rgba(34,211,238,.35);background:rgba(34,211,238,.08);padding:5px 12px;border-radius:99px}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--g);box-shadow:0 0 8px var(--g);animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.3}}
+.out{display:flex;align-items:center;gap:8px;color:var(--m);text-decoration:none;font-size:13px;padding:8px 14px;border-radius:99px;border:1px solid var(--line);background:rgba(255,255,255,.05);transition:.2s}
+.out:hover{color:var(--r);border-color:var(--r)}
+.out svg{width:16px;height:16px}
+
+.wrap{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:22px 24px 40px}
+.title{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+h1{font-size:24px;letter-spacing:2px;background:linear-gradient(90deg,#fff,var(--c) 60%,var(--v));-webkit-background-clip:text;background-clip:text;color:transparent}
+.title p{color:var(--m);font-size:14px;margin-top:4px}
+
+/* Stats (numbers change live, cards morph on hover) */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px}
+.stat{--h:18px;position:relative;padding:18px 20px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.03));backdrop-filter:blur(12px);overflow:hidden;cursor:default;
+transition:border-radius .45s cubic-bezier(.3,1.4,.5,1),transform .45s cubic-bezier(.3,1.4,.5,1),box-shadow .35s,border-color .35s}
+.stat:nth-child(1){--h:46px 12px 46px 12px;--t:translateY(-6px) scale(1.05) rotate(-1.2deg)}
+.stat:nth-child(2){--h:12px 46px 12px 46px;--t:translateY(-6px) scale(1.05) rotate(1.2deg)}
+.stat:nth-child(3){--h:60px;--t:translateY(-6px) scale(1.06)}
+.stat:nth-child(4){--h:6px 40px 6px 40px;--t:translateY(-6px) scale(1.05) skewX(-2deg)}
+.stat:hover{border-radius:var(--h);transform:var(--t);border-color:var(--a,var(--c));box-shadow:0 18px 40px rgba(0,0,0,.5),0 0 30px var(--a,var(--c))}
+.stat::before{content:"";position:absolute;left:0;top:0;height:3px;width:100%;background:var(--a,var(--c));box-shadow:0 0 14px var(--a,var(--c))}
+.stat small{display:block;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--m);margin-bottom:8px}
+.num{font-size:30px;font-weight:800;color:var(--a,var(--c));text-shadow:0 0 18px var(--a,var(--c))}
+.num b{display:inline-block;font-weight:800}
+.num span{font-size:13px;color:var(--m);font-weight:600;margin-left:4px;text-shadow:none}
+.bump{animation:bump .35s}
+@keyframes bump{50%{transform:scale(1.14)}}
+
+/* Panels */
+.grid{display:grid;grid-template-columns:1fr 400px;gap:18px;align-items:start}
+.panel{display:flex;flex-direction:column;height:620px;border-radius:22px;border:1px solid var(--line);background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.03));backdrop-filter:blur(14px);box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden}
+.phead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line)}
+.phead h2{font-size:14px;letter-spacing:2px}
+.phead small{color:var(--m);font-size:12px}
+.note{padding:9px 16px;font-size:12px;color:var(--m);border-top:1px solid var(--line)}
+
+/* Map */
+.mapwrap{position:relative;flex:1;min-height:0;overflow:hidden;background:#0a1022}
+#map{width:100%;height:100%;display:block;touch-action:none;cursor:grab;stroke:none}
+#map:active{cursor:grabbing}
+.sweep{position:absolute;left:50%;top:50%;width:170%;aspect-ratio:1;margin:-85% 0 0 -85%;border-radius:50%;background:conic-gradient(from 0deg,rgba(34,211,238,.16),transparent 22%);animation:spin 9s linear infinite;pointer-events:none;mix-blend-mode:screen}
+.zoom{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:6px;z-index:3}
+.zoom button{width:34px;height:34px;font:600 18px Inter,sans-serif;color:#e6edf7;background:rgba(5,8,22,.85);border:1px solid var(--line);border-radius:10px;cursor:pointer;transition:.2s}
+.zoom button:hover{color:var(--c);border-color:var(--c)}
+.credit{position:absolute;left:10px;bottom:6px;font-size:10px;color:#64748b;pointer-events:none}
+.tip{position:absolute;z-index:5;pointer-events:none;padding:8px 12px;border-radius:10px;font-size:12px;line-height:1.5;white-space:nowrap;background:rgba(5,8,22,.95);border:1px solid var(--c);box-shadow:0 0 16px rgba(34,211,238,.35)}
+.tip b{color:var(--c)}
+.tip span{color:var(--m)}
+
+.vm{cursor:pointer}
+.vm .body{fill:rgba(5,8,22,.92);stroke:var(--c);stroke-width:2;filter:drop-shadow(0 0 5px var(--c))}
+.vm.stopped .body{stroke:var(--y);filter:drop-shadow(0 0 5px var(--y))}
+.vm .halo{fill:none;stroke:#fff;stroke-width:2;opacity:0;transform-box:fill-box;transform-origin:center}
+.vm.sel .halo{opacity:1;animation:halo 1.2s ease-out infinite}
+@keyframes halo{0%{transform:scale(.8);opacity:1}100%{transform:scale(1.5);opacity:0}}
+.vm.sel .body{stroke:#fff;filter:drop-shadow(0 0 9px var(--v))}
+.vm text{fill:#fff;stroke:none;user-select:none}
+.city text{fill:#94a3b8;stroke:none;font:500 11px Inter,sans-serif;paint-order:stroke}
+.city circle{fill:#22d3ee;stroke:#050816;stroke-width:1.5}
+.grat text{fill:#475569;stroke:none;font:10px Inter,sans-serif}
+
+/* Buttons */
+.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;overflow:hidden;color:#04101f;background:linear-gradient(90deg,var(--c),var(--v));box-shadow:0 6px 22px rgba(34,211,238,.35);transition:.25s;padding:10px 14px}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(139,92,246,.55)}
+.btn svg{width:16px;height:16px;stroke-width:2.8}
+.btn.full{width:100%;padding:15px;font-size:14px;margin-top:6px}
+
+/* Fleet list */
+.tools{padding:12px 16px 8px}
+.search{width:100%;padding:11px 14px;font:14px Inter,sans-serif;color:#e6edf7;background:rgba(255,255,255,.05);border:1.5px solid var(--line);border-radius:12px;outline:0;transition:.2s}
+.search:focus,input:focus,select:focus{border-color:var(--c);box-shadow:0 0 0 4px rgba(34,211,238,.15)}
+.chips{display:flex;gap:8px;margin-top:10px}
+.chip{flex:1;padding:7px;font:600 12px Inter,sans-serif;color:var(--m);background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:99px;cursor:pointer;transition:.2s}
+.chip.on{color:#04101f;background:var(--c);border-color:var(--c)}
+#list{flex:1;overflow:auto;padding:6px 12px 14px}
+#list::-webkit-scrollbar{width:6px}#list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:9px}
+.veh{position:relative;display:flex;align-items:center;gap:12px;padding:12px;margin-top:8px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.04);cursor:pointer;transition:.2s}
+.veh:hover{border-color:rgba(34,211,238,.5);background:rgba(34,211,238,.06)}
+.veh.sel{border-color:var(--c);background:rgba(34,211,238,.1);box-shadow:0 0 18px rgba(34,211,238,.25)}
+.ico{flex:none;width:42px;height:42px;display:grid;place-items:center;font-size:20px;border-radius:12px;background:rgba(5,8,22,.7);border:1px solid var(--line)}
+.info{flex:1;min-width:0}
+.info b{display:block;font-size:14px;letter-spacing:.5px}
+.info span{display:block;font-size:12px;color:var(--m);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.prog{height:4px;margin-top:8px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--c),var(--v))}
+.spd{flex:none;text-align:right}
+.spd b{font:800 20px Orbitron,sans-serif;color:var(--c)}
+.spd small{display:block;font-size:10px;color:var(--m);letter-spacing:1px}
+.badge{display:inline-block;margin-top:4px;font-size:10px;font-style:normal;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:99px;color:var(--g);background:rgba(34,197,94,.15)}
+.badge.stop{color:var(--y);background:rgba(251,191,36,.15)}
+.del{position:absolute;top:6px;right:6px;width:20px;height:20px;display:none;place-items:center;font-size:11px;color:var(--m);background:rgba(255,255,255,.06);border:0;border-radius:50%;cursor:pointer}
+.veh:hover .del{display:grid}.del:hover{color:var(--r)}
+.empty{padding:30px 10px;text-align:center;color:var(--m);font-size:14px}
+
+/* Modal */
+.modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:20px;background:rgba(2,4,12,.75);backdrop-filter:blur(6px);overflow:auto}
+.mcard{position:relative;width:100%;max-width:460px;padding:30px 28px 26px;border-radius:24px;border:1px solid rgba(255,255,255,.16);background:linear-gradient(160deg,#0f1830,#080d20);box-shadow:0 30px 80px rgba(0,0,0,.7);animation:rise .35s both}
+@keyframes rise{from{opacity:0;transform:translateY(20px)}}
+.mcard h3{font-size:18px;letter-spacing:2px;background:linear-gradient(90deg,#fff,var(--c));-webkit-background-clip:text;background-clip:text;color:transparent}
+.mcard .sub{color:var(--m);font-size:13px;margin:6px 0 20px}
+.x{position:absolute;top:14px;right:14px;width:32px;height:32px;display:grid;place-items:center;color:var(--m);background:rgba(255,255,255,.06);border:0;border-radius:50%;cursor:pointer}
+.x:hover{color:var(--r)}
+.field{margin-bottom:14px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--c);margin-bottom:7px}
+input,select{width:100%;padding:13px 14px;font:15px Inter,sans-serif;color:#e6edf7;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.14);border-radius:12px;outline:0;transition:.2s}
+select option{background:#0f1830;color:#e6edf7}
+input::placeholder{color:#64748b}
+#plate{text-transform:uppercase}
+.hint{max-height:0;overflow:hidden;opacity:0;font-size:12.5px;color:var(--r);transition:.25s}
+.invalid input,.invalid select{border-color:var(--r);background:rgba(251,113,133,.07);box-shadow:0 0 0 4px rgba(251,113,133,.15)}
+.invalid label{color:var(--r)}
+.invalid .hint{max-height:30px;opacity:1;margin-top:7px}
+.valid input{border-color:var(--g)}
+.valid label{color:var(--g)}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+.toast{position:fixed;left:50%;bottom:28px;z-index:60;transform:translate(-50%,30px);opacity:0;padding:12px 20px;border-radius:14px;font-size:14px;font-weight:500;color:#e6edf7;background:rgba(5,8,22,.95);border:1px solid var(--g);box-shadow:0 0 24px rgba(34,197,94,.35);transition:.35s;pointer-events:none}
+.toast.show{transform:translate(-50%,0);opacity:1}
+
+@media(max-width:1000px){
+  .grid{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .panel{height:auto}
+  .mapwrap{flex:none;height:440px}
+  #list{max-height:520px}
+}
+@media(max-width:520px){
+  .top{padding:10px 14px}.wrap{padding:16px 14px 32px}
+  .brand span{display:none}
+  h1{font-size:19px}.num{font-size:24px}
+  .row2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <svg viewBox="0 0 120 120"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
+      <circle cx="60" cy="60" r="54" fill="none" stroke="url(#lg)" stroke-width="3" stroke-dasharray="3 7" style="stroke:url(#lg)"/>
+      <path d="M60 24C47 24 37 34 37 46c0 16 23 40 23 40s23-24 23-40c0-12-10-22-23-22z" fill="rgba(34,211,238,.12)" style="stroke:url(#lg);stroke-width:4"/>
+      <path d="M49 50l3-8q1-2 3-2h10q2 0 3 2l3 8z" fill="url(#lg)"/><rect x="47" y="49" width="26" height="8" rx="3" fill="url(#lg)"/>
+      <circle cx="54" cy="58" r="3" fill="#050816" style="stroke:#22d3ee;stroke-width:2"/><circle cx="66" cy="58" r="3" fill="#050816" style="stroke:#22d3ee;stroke-width:2"/></svg>
+    <span>VEHICLE TRACKING</span>
+  </div>
+  <div class="live"><i></i> Live</div>
+  <a href="index.html" class="out"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Sign Out</a>
+</header>
+
+<main class="wrap">
+  <div class="title">
+    <div>
+      <h1>FLEET DASHBOARD</h1>
+      <p>Live overview of your fleet, speed and activity.</p>
+    </div>
+    <button class="btn" id="addBtn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add Vehicle</button>
+  </div>
+
+  <section class="stats">
+    <div class="stat"><small>Total Vehicles</small><div class="num"><b id="sTotal">0</b></div></div>
+    <div class="stat" style="--a:var(--g)"><small>Moving</small><div class="num"><b id="sMoving">0</b></div></div>
+    <div class="stat" style="--a:var(--y)"><small>Stopped</small><div class="num"><b id="sStopped">0</b></div></div>
+    <div class="stat" style="--a:var(--v)"><small>Average Speed</small><div class="num"><b id="sAvg">0</b><span>km/h</span></div></div>
+  </section>
+
+  <section class="grid">
+    <div class="panel">
+      <div class="phead"><h2>LIVE MAP</h2><small id="mapCount"></small></div>
+      <div class="mapwrap" id="mapwrap">
+        <svg id="map" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="sweep"></div>
+        <div class="zoom"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button><button id="zreset" aria-label="Reset view">⌂</button></div>
+        <div class="credit">Map data © OpenStreetMap · © CARTO</div>
+        <div class="tip" id="tip" hidden></div>
+      </div>
+      <div class="note">Click a vehicle to follow its route · Scroll to zoom · Drag to pan</div>
+    </div>
+
+    <div class="panel">
+      <div class="phead"><h2>YOUR FLEET</h2><small id="count"></small></div>
+      <div class="tools">
+        <input class="search" id="q" placeholder="Search by number, driver or city">
+        <div class="chips">
+          <button class="chip on" data-f="all">All</button>
+          <button class="chip" data-f="moving">Moving</button>
+          <button class="chip" data-f="stopped">Stopped</button>
+        </div>
+      </div>
+      <div id="list"></div>
+    </div>
+  </section>
+</main>
+
+<!-- Add Vehicle modal -->
+<div class="modal" id="modal" hidden>
+  <form class="mcard" id="addForm" novalidate>
+    <button type="button" class="x" id="closeM" aria-label="Close">✕</button>
+    <h3>ADD NEW VEHICLE</h3>
+    <p class="sub">Enter the vehicle details to start live tracking.</p>
+
+    <div class="field"><label for="plate">Vehicle Number</label>
+      <input id="plate" placeholder="e.g. DL01AB1234" autocomplete="off" maxlength="13">
+      <div class="hint"></div></div>
+
+    <div class="row2">
+      <div class="field"><label for="type">Vehicle Type</label><select id="type"></select></div>
+      <div class="field"><label for="speed">Speed (km/h)</label>
+        <input id="speed" type="number" placeholder="10 - 120" min="10" max="120">
+        <div class="hint"></div></div>
+    </div>
+
+    <div class="field"><label for="driver">Driver Name</label>
+      <input id="driver" placeholder="Enter driver's full name" autocomplete="off">
+      <div class="hint"></div></div>
+
+    <div class="row2">
+      <div class="field"><label for="from">Start City</label><select id="from"></select></div>
+      <div class="field"><label for="to">Destination</label><select id="to"></select><div class="hint"></div></div>
+    </div>
+
+    <button class="btn full">Add Vehicle</button>
+  </form>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const NS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, parent) => {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+};
+
+/* ================= Data ================= */
+const CITIES = {
+  "Delhi": [28.6139, 77.2090], "Meerut": [28.9845, 77.7064], "Panipat": [29.3909, 76.9635],
+  "Ambala": [30.3782, 76.7767], "Chandigarh": [30.7333, 76.7794], "Ludhiana": [30.9010, 75.8573],
+  "Amritsar": [31.6340, 74.8723], "Jammu": [32.7266, 74.8570], "Srinagar": [34.0837, 74.7973],
+  "Shimla": [31.1048, 77.1734], "Dehradun": [30.3165, 78.0322], "Haridwar": [29.9457, 78.1642],
+  "Moradabad": [28.8386, 78.7733], "Bareilly": [28.3670, 79.4304], "Agra": [27.1767, 78.0081],
+  "Jaipur": [26.9124, 75.7873], "Ajmer": [26.4499, 74.6399], "Gwalior": [26.2183, 78.1828],
+  "Kanpur": [26.4499, 80.3319], "Lucknow": [26.8467, 80.9462], "Prayagraj": [25.4358, 81.8463],
+  "Varanasi": [25.3176, 82.9739], "Gorakhpur": [26.7606, 83.3732]
+};
+// Road network between cities (vehicles follow these roads)
+const EDGES = [
+  ["Delhi","Panipat"],["Panipat","Ambala"],["Ambala","Chandigarh"],["Ambala","Ludhiana"],["Chandigarh","Ludhiana"],
+  ["Ludhiana","Amritsar"],["Amritsar","Jammu"],["Jammu","Srinagar"],["Chandigarh","Shimla"],["Chandigarh","Dehradun"],
+  ["Delhi","Meerut"],["Meerut","Haridwar"],["Haridwar","Dehradun"],["Meerut","Moradabad"],["Moradabad","Bareilly"],
+  ["Bareilly","Lucknow"],["Delhi","Agra"],["Agra","Gwalior"],["Agra","Jaipur"],["Delhi","Jaipur"],["Jaipur","Ajmer"],
+  ["Agra","Kanpur"],["Kanpur","Lucknow"],["Kanpur","Prayagraj"],["Lucknow","Prayagraj"],["Prayagraj","Varanasi"],
+  ["Lucknow","Gorakhpur"],["Gorakhpur","Varanasi"]
+];
+const ICON = { Car: "🚗", Truck: "🚚", Bus: "🚌", Van: "🚐", Bike: "🏍️" };
+const SCALE = 1200;                    // 1 real second = 20 minutes of travel, so movement is clearly visible
+const KEY = "vts_custom_vehicles";
+
+// Dummy vehicles driving across the road network at different speeds
+const SEED = [
+  { plate: "DL01AB1234", type: "Car",   driver: "Rahul Sharma",     from: "Delhi",      to: "Lucknow",    speed: 92 },
+  { plate: "HR26CD5678", type: "Car",   driver: "Amit Verma",       from: "Delhi",      to: "Amritsar",   speed: 88 },
+  { plate: "RJ14KL2468", type: "Van",   driver: "Mohan Meena",      from: "Jaipur",     to: "Gwalior",    speed: 66 },
+  { plate: "UP32EF9012", type: "Truck", driver: "Sunil Yadav",      from: "Lucknow",    to: "Delhi",      speed: 52 },
+  { plate: "PB02GH3456", type: "Bus",   driver: "Gurpreet Singh",   from: "Amritsar",   to: "Delhi",      speed: 74 },
+  { plate: "UK07IJ7890", type: "Car",   driver: "Vikas Rawat",      from: "Dehradun",   to: "Delhi",      speed: 70 },
+  { plate: "HP01MN1357", type: "Car",   driver: "Deepak Thakur",    from: "Shimla",     to: "Ludhiana",   speed: 42 },
+  { plate: "UP80OP8642", type: "Bus",   driver: "Ravi Pandey",      from: "Agra",       to: "Varanasi",   speed: 80 },
+  { plate: "JK02QR9753", type: "Truck", driver: "Aman Gupta",       from: "Jammu",      to: "Chandigarh", speed: 48 },
+  { plate: "UP65WX4455", type: "Truck", driver: "Manoj Tiwari",     from: "Varanasi",   to: "Lucknow",    speed: 0, p: 0 },
+  { plate: "UP15ST1122", type: "Bike",  driver: "Nitin Chauhan",    from: "Meerut",     to: "Dehradun",   speed: 60 },
+  { plate: "PB10UV6677", type: "Van",   driver: "Harpreet Kaur",    from: "Ludhiana",   to: "Delhi",      speed: 58 },
+  { plate: "JK01AA2020", type: "Truck", driver: "Imran Khan",       from: "Srinagar",   to: "Amritsar",   speed: 45 },
+  { plate: "RJ27BB3131", type: "Bus",   driver: "Kailash Jat",      from: "Ajmer",      to: "Delhi",      speed: 72 },
+  { plate: "UP53CC4242", type: "Car",   driver: "Saurabh Mishra",   from: "Gorakhpur",  to: "Lucknow",    speed: 85 },
+  { plate: "UP70DD5353", type: "Van",   driver: "Pankaj Dubey",     from: "Prayagraj",  to: "Kanpur",     speed: 62 },
+  { plate: "MP07EE6464", type: "Truck", driver: "Rajesh Kushwaha",  from: "Gwalior",    to: "Delhi",      speed: 56 },
+  { plate: "UK08FF7575", type: "Bus",   driver: "Anil Negi",        from: "Haridwar",   to: "Chandigarh", speed: 64 },
+  { plate: "UP25GG8686", type: "Car",   driver: "Faizan Ali",       from: "Bareilly",   to: "Meerut",     speed: 78 },
+  { plate: "HR06HH9797", type: "Truck", driver: "Balwinder Singh",  from: "Ambala",     to: "Jaipur",     speed: 51 },
+  { plate: "UP78JJ1010", type: "Bike",  driver: "Shubham Srivastava", from: "Kanpur",   to: "Agra",       speed: 68 },
+  { plate: "DL04KK2121", type: "Car",   driver: "Priya Malhotra",   from: "Delhi",      to: "Shimla",     speed: 90 },
+  { plate: "CH01LL3232", type: "Van",   driver: "Tarun Bansal",     from: "Chandigarh", to: "Dehradun",   speed: 57 },
+  { plate: "UP14MM4343", type: "Bus",   driver: "Deepa Rani",       from: "Meerut",     to: "Jaipur",     speed: 76 },
+  { plate: "UP32NN5454", type: "Truck", driver: "Ramesh Chand",     from: "Moradabad",  to: "Agra",       speed: 0 }
+];
+
+/* ================= Geometry ================= */
+const rad = d => d * Math.PI / 180;
+function km(a, b) {
+  const dLat = rad(b[0] - a[0]), dLng = rad(b[1] - a[1]);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a[0])) * Math.cos(rad(b[0])) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.asin(Math.sqrt(h));
+}
+// Web-Mercator projection (zoom 7) so that map tiles line up with our overlay
+const Z = 7, WORLD = 256 * 2 ** Z;
+const mx = lng => (lng + 180) / 360 * WORLD;
+const my = lat => { const s = Math.sin(rad(lat)); return (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * WORLD; };
+const X0 = mx(72), X1 = mx(85), Y0 = my(34.8), Y1 = my(24.6);
+const W = X1 - X0, H = Y1 - Y0;
+const proj = c => [mx(c[1]) - X0, my(c[0]) - Y0];
+
+// Shortest road route between two cities (Dijkstra)
+const ADJ = {};
+EDGES.forEach(([a, b]) => { const d = km(CITIES[a], CITIES[b]); (ADJ[a] ??= []).push([b, d]); (ADJ[b] ??= []).push([a, d]); });
+function route(s, t) {
+  const dist = {}, prev = {}, Q = new Set(Object.keys(CITIES));
+  Q.forEach(c => dist[c] = Infinity); dist[s] = 0;
+  while (Q.size) {
+    let u = null; Q.forEach(c => { if (u === null || dist[c] < dist[u]) u = c; });
+    Q.delete(u); if (u === t) break;
+    (ADJ[u] || []).forEach(([w, d]) => { if (dist[u] + d < dist[w]) { dist[w] = dist[u] + d; prev[w] = u; } });
+  }
+  const r = [t]; while (r[0] !== s) r.unshift(prev[r[0]]);
+  return r;
+}
+
+function make(o, custom) {
+  const names = route(o.from, o.to), pts = names.map(n => proj(CITIES[n])), cum = [0];
+  for (let i = 1; i < names.length; i++) cum.push(cum[i - 1] + km(CITIES[names[i - 1]], CITIES[names[i]]));
+  return { ...o, custom, id: o.plate, names, pts, cum, dist: cum[cum.length - 1], base: o.speed, speed: o.speed, j: 0,
+           p: o.p ?? 0.05 + Math.random() * 0.9, dir: Math.random() < .5 ? 1 : -1, x: 0, y: 0, trail: [] };
+}
+function place(v) {
+  const d = v.p * v.dist; let i = 1;
+  while (i < v.cum.length - 1 && v.cum[i] < d) i++;
+  const t = (d - v.cum[i - 1]) / ((v.cum[i] - v.cum[i - 1]) || 1), a = v.pts[i - 1], b = v.pts[i];
+  v.x = a[0] + (b[0] - a[0]) * t; v.y = a[1] + (b[1] - a[1]) * t;
+}
+function loadCustom() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; } }
+function saveCustom() {
+  try { localStorage.setItem(KEY, JSON.stringify(V.filter(v => v.custom)
+    .map(v => ({ plate: v.plate, type: v.type, driver: v.driver, from: v.from, to: v.to, speed: v.base })))); } catch (e) {}
+}
+
+const saved = loadCustom();
+let V = [...SEED.map(o => make(o, false)), ...saved.map(o => make(o, true))];
+let selected = null, filter = "all", query = "", hovered = null;
+
+/* ================= Map (pure SVG, works offline) ================= */
+const svg = $("#map"), SC = [];            // SC = elements kept at constant on-screen size
+let view = { x: 0, y: 0, w: W, h: H };
+svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+
+const defs = el("defs", {}, svg);
+const bg = el("radialGradient", { id: "bg", cx: "50%", cy: "45%", r: "75%" }, defs);
+el("stop", { offset: "0", "stop-color": "#10203d" }, bg); el("stop", { offset: "1", "stop-color": "#060a18" }, bg);
+el("rect", { width: W, height: H, fill: "url(#bg)" }, svg);
+
+// Map tiles (optional: if they fail to load, the built-in map below still shows)
+const tiles = el("g", {}, svg);
+for (let tx = Math.floor(X0 / 256); tx <= Math.floor(X1 / 256); tx++)
+  for (let ty = Math.floor(Y0 / 256); ty <= Math.floor(Y1 / 256); ty++) {
+    const im = el("image", { x: tx * 256 - X0, y: ty * 256 - Y0, width: 257, height: 257,
+      href: `https://${"abcd"[(tx + ty) % 4]}.basemaps.cartocdn.com/dark_all/${Z}/${tx}/${ty}.png` }, tiles);
+    im.addEventListener("error", () => im.remove());
+  }
+
+// Graticule (latitude / longitude lines)
+const grat = el("g", { class: "grat" }, svg);
+for (let lat = 26; lat <= 34; lat += 2) {
+  const y = proj([lat, 72])[1];
+  el("line", { x1: 0, x2: W, y1: y, y2: y, stroke: "rgba(34,211,238,.13)", "stroke-width": 1, "vector-effect": "non-scaling-stroke", "stroke-dasharray": "2 6" }, grat);
+  const t = el("text", {}, grat); t.textContent = lat + "°N"; t.x = 8; t.y = y - 4; SC.push(t);
+}
+for (let lng = 74; lng <= 84; lng += 2) {
+  const x = proj([30, lng])[0];
+  el("line", { x1: x, x2: x, y1: 0, y2: H, stroke: "rgba(34,211,238,.13)", "stroke-width": 1, "vector-effect": "non-scaling-stroke", "stroke-dasharray": "2 6" }, grat);
+  const t = el("text", {}, grat); t.textContent = lng + "°E"; t.x = x + 4; t.y = H - 8; SC.push(t);
+}
+
+// Roads
+const roads = el("g", {}, svg);
+EDGES.forEach(([a, b]) => {
+  const [x1, y1] = proj(CITIES[a]), [x2, y2] = proj(CITIES[b]);
+  el("line", { x1, y1, x2, y2, stroke: "rgba(34,211,238,.10)", "stroke-width": 7, "stroke-linecap": "round", "vector-effect": "non-scaling-stroke" }, roads);
+  el("line", { x1, y1, x2, y2, stroke: "rgba(34,211,238,.45)", "stroke-width": 1.6, "vector-effect": "non-scaling-stroke" }, roads);
+});
+const selRoute = el("polyline", { fill: "none", stroke: "#8b5cf6", "stroke-width": 4, "stroke-linejoin": "round", "stroke-linecap": "round", "vector-effect": "non-scaling-stroke", opacity: 0 }, svg);
+selRoute.style.filter = "drop-shadow(0 0 6px #8b5cf6)";
+
+// Cities
+Object.entries(CITIES).forEach(([name, c]) => {
+  const g = el("g", { class: "city" }, svg), [x, y] = proj(c);
+  el("circle", { r: 4 }, g);
+  const t = el("text", { x: 8, y: 4, stroke: "#050816", "stroke-width": 3 }, g); t.textContent = name;
+  g.x = x; g.y = y; SC.push(g);
+});
+
+const trails = el("g", {}, svg), vehicles = el("g", {}, svg);
+
+function attach(v) {
+  v.trailEl = el("polyline", { fill: "none", stroke: "#22d3ee", "stroke-width": 3, "stroke-linecap": "round", "stroke-linejoin": "round", opacity: .55, "vector-effect": "non-scaling-stroke" }, trails);
+  v.g = el("g", { class: "vm" }, vehicles); v.g.dataset.id = v.id;
+  el("circle", { class: "halo", r: 22 }, v.g); el("circle", { class: "body", r: 16 }, v.g);
+  const t = el("text", { "text-anchor": "middle", "dominant-baseline": "central", "font-size": 17 }, v.g); t.textContent = ICON[v.type];
+  place(v); styleV(v);
+}
+function styleV(v) {
+  v.g.setAttribute("class", "vm" + (v.speed ? "" : " stopped") + (v.id === selected ? " sel" : ""));
+}
+
+// Keep markers/labels the same size on screen while zooming
+function layout() {
+  const r = svg.getBoundingClientRect(), ppu = Math.min(r.width / view.w, r.height / view.h) || 1, k = 1 / ppu;
+  svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.w} ${view.h}`);
+  SC.forEach(e => e.setAttribute("transform", `translate(${e.x},${e.y}) scale(${k})`));
+  V.forEach(v => v.g.setAttribute("transform", `translate(${v.x},${v.y}) scale(${k})`));
+}
+
+/* ---- Zoom, pan and fly-to ---- */
+const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+function fit(o) { o.w = clamp(o.w, W / 6, W); o.h = o.w * H / W; o.x = clamp(o.x, 0, W - o.w); o.y = clamp(o.y, 0, H - o.h); }
+function svgPt(cx, cy, m) { const p = svg.createSVGPoint(); p.x = cx; p.y = cy; return p.matrixTransform(m || svg.getScreenCTM().inverse()); }
+function zoomAt(f, px, py) {
+  const nw = clamp(view.w * f, W / 6, W), r = nw / view.w;
+  view.x = px - (px - view.x) * r; view.y = py - (py - view.y) * r; view.w = nw; view.h = nw * H / W; fit(view);
+}
+$("#mapwrap").addEventListener("wheel", e => { e.preventDefault(); const p = svgPt(e.clientX, e.clientY); zoomAt(e.deltaY < 0 ? .85 : 1.18, p.x, p.y); }, { passive: false });
+$("#zin").onclick = () => zoomAt(.7, view.x + view.w / 2, view.y + view.h / 2);
+$("#zout").onclick = () => zoomAt(1.4, view.x + view.w / 2, view.y + view.h / 2);
+$("#zreset").onclick = () => flyTo(W / 2, H / 2, W);
+
+let drag = null, tween = null;
+svg.addEventListener("pointerdown", e => {
+  if (e.target.closest(".vm")) return;
+  const m = svg.getScreenCTM().inverse();
+  drag = { m, s: svgPt(e.clientX, e.clientY, m), v: { ...view } }; svg.setPointerCapture(e.pointerId); tween = null;
+});
+svg.addEventListener("pointermove", e => {
+  if (!drag) return;
+  const p = svgPt(e.clientX, e.clientY, drag.m);
+  view.x = drag.v.x - (p.x - drag.s.x); view.y = drag.v.y - (p.y - drag.s.y); fit(view);
+});
+svg.addEventListener("pointerup", () => drag = null);
+
+function flyTo(cx, cy, w) {
+  const s = { ...view }, e = { w, h: w * H / W, x: 0, y: 0 }; e.x = cx - e.w / 2; e.y = cy - e.h / 2; fit(e);
+  const t0 = performance.now();
+  tween = now => { const k = Math.min(1, (now - t0) / 650), q = 1 - (1 - k) ** 3;
+    view.x = s.x + (e.x - s.x) * q; view.y = s.y + (e.y - s.y) * q; view.w = s.w + (e.w - s.w) * q; view.h = view.w * H / W; return k < 1; };
+}
+
+/* ---- Hover tooltip + click to select ---- */
+const tip = $("#tip");
+function tipHTML(v) {
+  return `<b>${ICON[v.type]} ${v.plate}</b> · ${v.speed ? v.speed + " km/h" : "Stopped"}<br><span>${v.driver} · ${origin(v)} → ${dest(v)}</span>`;
+}
+svg.addEventListener("mousemove", e => {
+  const g = e.target.closest(".vm");
+  if (!g) { tip.hidden = true; hovered = null; return; }
+  hovered = g.dataset.id; const v = V.find(x => x.id === hovered), r = $("#mapwrap").getBoundingClientRect();
+  tip.innerHTML = tipHTML(v); tip.hidden = false;
+  tip.style.left = Math.min(e.clientX - r.left + 16, r.width - tip.offsetWidth - 8) + "px";
+  tip.style.top = Math.max(e.clientY - r.top - 54, 6) + "px";
+});
+svg.addEventListener("mouseleave", () => { tip.hidden = true; hovered = null; });
+svg.addEventListener("click", e => { const g = e.target.closest(".vm"); if (g) select(g.dataset.id, true); });
+
+function select(id, fromMap) {
+  selected = id;
+  const v = V.find(x => x.id === id);
+  V.forEach(styleV);
+  if (v) {
+    selRoute.setAttribute("points", v.pts.map(p => p.join(",")).join(" ")); selRoute.setAttribute("opacity", .9);
+    vehicles.appendChild(v.g); flyTo(v.x, v.y, W / 2.4);
+  }
+  document.querySelectorAll(".veh").forEach(e => e.classList.toggle("sel", e.dataset.id === id));
+  const row = document.querySelector(`.veh[data-id="${id}"]`);
+  if (row && fromMap) row.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+
+/* ================= Fleet list ================= */
+const eta = h => h < 1 ? `${Math.max(1, Math.round(h * 60))}m` : `${Math.floor(h)}h ${Math.round(h % 1 * 60) % 60}m`;
+const dest = v => v.dir === 1 ? v.to : v.from;
+const origin = v => v.dir === 1 ? v.from : v.to;
+
+function renderList() {
+  const q = query.trim().toLowerCase();
+  const rows = V.filter(v =>
+    (filter === "all" || (filter === "moving") === v.speed > 0) &&
+    (!q || `${v.plate} ${v.driver} ${v.from} ${v.to} ${v.type}`.toLowerCase().includes(q)));
+  $("#count").textContent = `${rows.length} of ${V.length} vehicles`;
+  $("#mapCount").textContent = `${V.filter(v => v.speed > 0).length} moving now`;
+  $("#list").innerHTML = rows.length ? rows.map(v => `
+    <div class="veh${v.id === selected ? " sel" : ""}" data-id="${v.id}">
+      <div class="ico">${ICON[v.type]}</div>
+      <div class="info">
+        <b>${v.plate}</b>
+        <span>${v.driver} · ${origin(v)} → ${dest(v)}</span>
+        <div class="prog"><i id="p-${v.id}"></i></div>
+      </div>
+      <div class="spd"><b id="s-${v.id}">${v.speed}</b><small>KM/H</small><em class="badge" id="b-${v.id}"></em></div>
+      ${v.custom ? `<button class="del" data-del="${v.id}" title="Remove vehicle">✕</button>` : ""}
+    </div>`).join("") : `<div class="empty">No vehicles found.</div>`;
+  updateList();
+}
+function updateList() {
+  V.forEach(v => {
+    const s = $("#s-" + v.id); if (!s) return;
+    s.textContent = v.speed;
+    const b = $("#b-" + v.id), moving = v.speed > 0;
+    b.textContent = moving ? "Moving · ETA " + eta((v.dir === 1 ? 1 - v.p : v.p) * v.dist / v.speed) : "Stopped";
+    b.className = "badge" + (moving ? "" : " stop");
+    $("#p-" + v.id).style.width = (v.dir === 1 ? v.p : 1 - v.p) * 100 + "%";
+  });
+}
+
+$("#list").addEventListener("click", e => {
+  const d = e.target.closest("[data-del]");
+  if (d) {
+    const v = V.find(x => x.id === d.dataset.del);
+    v.g.remove(); v.trailEl.remove(); V = V.filter(x => x !== v);
+    if (selected === v.id) { selected = null; selRoute.setAttribute("opacity", 0); }
+    S.extra = Math.max(0, S.extra - 1); saveCustom(); renderList(); return;
+  }
+  const row = e.target.closest(".veh"); if (row) select(row.dataset.id, false);
+});
+$("#q").addEventListener("input", e => { query = e.target.value; renderList(); });
+document.querySelectorAll(".chip").forEach(c => c.onclick = () => {
+  document.querySelectorAll(".chip").forEach(x => x.classList.toggle("on", x === c));
+  filter = c.dataset.f; renderList();
+});
+
+/* ================= Live stat cards (random numbers that keep changing) ================= */
+const S = { tot: 1248, frac: .72, avg: 58, extra: saved.length };
+function setStat(id, val) {
+  const e = $("#" + id), t = val.toLocaleString("en-IN");
+  if (e.textContent !== t) { e.textContent = t; e.classList.remove("bump"); void e.offsetWidth; e.classList.add("bump"); }
+}
+function stepStats() {
+  S.tot = clamp(S.tot + Math.round((Math.random() - .5) * 8), 1180, 1320);
+  S.frac = clamp(S.frac + (Math.random() - .5) * .03, .6, .8);
+  S.avg = clamp(S.avg + (Math.random() - .5) * 4, 46, 70);
+  const tot = S.tot + S.extra, mov = Math.round(tot * S.frac);
+  setStat("sTotal", tot); setStat("sMoving", mov); setStat("sStopped", tot - mov); setStat("sAvg", Math.round(S.avg));
+}
+setInterval(stepStats, 1300); stepStats();
+
+/* ================= Animation loop ================= */
+let last = performance.now(), acc = 0, frame = 0;
+function loop(now) {
+  const dt = Math.min((now - last) / 1000, .1); last = now; frame++;
+  V.forEach(v => {
+    if (v.base) {
+      v.j = clamp(v.j + (Math.random() - .5) * dt * 10, -4, 4);
+      v.speed = Math.max(5, Math.round(v.base + v.j));
+      v.p += v.dir * (v.speed * dt * SCALE / 3600) / v.dist;
+      if (v.p >= 1) { v.p = 1; v.dir = -1; renderList(); }
+      else if (v.p <= 0) { v.p = 0; v.dir = 1; renderList(); }
+    }
+    place(v);
+    if (v.base && frame % 3 === 0) {
+      v.trail.push([v.x, v.y]); if (v.trail.length > 18) v.trail.shift();
+      v.trailEl.setAttribute("points", v.trail.map(p => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" "));
+    }
+  });
+  if (tween && !tween(now)) tween = null;
+  layout();
+  acc += dt; if (acc > .3) { acc = 0; updateList(); if (hovered) { const v = V.find(x => x.id === hovered); if (v) tip.innerHTML = tipHTML(v); } }
+  requestAnimationFrame(loop);
+}
+
+/* ================= Add Vehicle ================= */
+const cityOpts = Object.keys(CITIES).sort().map(c => `<option>${c}</option>`).join("");
+$("#type").innerHTML = Object.keys(ICON).map(t => `<option>${t}</option>`).join("");
+$("#from").innerHTML = $("#to").innerHTML = cityOpts;
+$("#from").value = "Delhi"; $("#to").value = "Jaipur";
+
+const norm = v => v.replace(/[\s-]/g, "").toUpperCase();
+const rules = {
+  plate: v => !v ? "Vehicle number is required."
+    : !/^[A-Z]{2}\d{1,2}[A-Z]{0,3}\d{4}$/.test(norm(v)) ? "Enter a valid number (e.g. DL01AB1234)"
+    : V.some(x => x.plate === norm(v)) ? "This vehicle has already been added" : "",
+  speed: v => !v ? "Speed is required." : (isNaN(v) || v < 10 || v > 120) ? "Speed must be between 10 and 120 km/h" : "",
+  driver: v => !v ? "Driver name is required." : !/^[A-Za-z][A-Za-z .'-]+$/.test(v) ? "Enter a valid name (letters only)" : "",
+  to: v => v === $("#from").value ? "Destination must be different from the start city" : ""
+};
+function check(k, force) {
+  const input = $("#" + k), box = input.closest(".field"), v = input.value.trim();
+  box.classList.remove("valid", "invalid", "shake");
+  box.querySelector(".hint").textContent = "";
+  if (!v && !force) return false;
+  const msg = rules[k](v);
+  box.classList.add(msg ? "invalid" : "valid");
+  box.querySelector(".hint").textContent = msg;
+  if (msg && force) { void box.offsetWidth; box.classList.add("shake"); }
+  return !msg;
+}
+Object.keys(rules).forEach(k => $("#" + k).addEventListener("input", () => check(k)));
+$("#from").addEventListener("change", () => check("to", true));
+$("#to").addEventListener("change", () => check("to", true));
+
+const openM = () => { $("#modal").hidden = false; setTimeout(() => $("#plate").focus(), 50); };
+const closeM = () => { $("#modal").hidden = true; $("#addForm").reset();
+  $("#from").value = "Delhi"; $("#to").value = "Jaipur";
+  document.querySelectorAll("#addForm .field").forEach(f => f.classList.remove("valid", "invalid")); };
+$("#addBtn").onclick = openM;
+$("#closeM").onclick = closeM;
+$("#modal").addEventListener("mousedown", e => { if (e.target.id === "modal") closeM(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#modal").hidden) closeM(); });
+
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+$("#addForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const bad = ["plate", "speed", "driver", "to"].filter(k => !check(k, true));
+  if (bad.length) return $("#" + bad[0]).focus();
+
+  const v = make({ plate: norm($("#plate").value), type: $("#type").value, driver: $("#driver").value.trim(),
+                   from: $("#from").value, to: $("#to").value, speed: +$("#speed").value, p: 0 }, true);
+  v.dir = 1;
+  V.push(v); attach(v); S.extra++; stepStats(); saveCustom();
+  filter = "all"; query = ""; $("#q").value = "";
+  document.querySelectorAll(".chip").forEach(x => x.classList.toggle("on", x.dataset.f === "all"));
+  closeM(); renderList(); select(v.id, true);
+  toast(`Vehicle ${v.plate} added successfully`);
+});
+
+/* ================= Start ================= */
+V.forEach(attach);
+renderList();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
